@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sam’s RotMG Covenant — Witness Signing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,500;0,700;1,500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --desk:#2B3A4F; --desk-deep:#1E2A3A; --paper:#FFFFFF; --ink:#1A2A6C;
+  --text:#F2F4F7; --muted:#B7C1CF; --seal:#9B1C1C; --seal-hi:#B92A2A;
+  --panel:#F7F8FA; --panel-text:#1C2430; --panel-muted:#5A6576; --line:#CED4DC;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --desk:#151C27; --desk-deep:#0E141C; --text:#E8ECF1; --muted:#9AA6B6;
+    --panel:#1E2733; --panel-text:#E8ECF1; --panel-muted:#9AA6B6; --line:#334155;
+    --ink:#9DB2FF; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --desk:#151C27; --desk-deep:#0E141C; --text:#E8ECF1; --muted:#9AA6B6;
+  --panel:#1E2733; --panel-text:#E8ECF1; --panel-muted:#9AA6B6; --line:#334155;
+  --ink:#9DB2FF; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--desk);color:var(--text);
+  font:16px/1.55 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+header{max-width:1700px;margin:0 auto;padding:36px clamp(14px,2.5vw,36px) 22px}
+h1{font:700 clamp(2rem,5vw,3.1rem)/1.08 "EB Garamond",Georgia,serif;margin:0 0 14px;letter-spacing:-.01em}
+header p{color:var(--muted);margin:0;max-width:80ch}
+main{max-width:1700px;margin:0 auto;padding:0 clamp(14px,2.5vw,36px) 60px;display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:32px;align-items:start}
+@media (max-width:1000px){main{grid-template-columns:1fr}}
+#viewer{min-width:0}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}
+.pager button{font:600 .95rem "IBM Plex Sans",sans-serif;color:var(--text);background:transparent;border:1px solid var(--muted);border-radius:3px;padding:9px 16px;cursor:pointer;min-width:96px}
+.pager button:hover:not(:disabled){background:rgba(255,255,255,.08)}
+.pager button:disabled{opacity:.35;cursor:default}
+#count{color:var(--muted);font-size:.95rem;text-align:center}
+#doc{display:flex;gap:20px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;
+  padding:4px 2px 18px;scrollbar-width:thin;scrollbar-color:var(--muted) transparent;-webkit-overflow-scrolling:touch}
+#doc .loading{flex:1}
+#doc canvas{flex:0 0 auto;scroll-snap-align:start;width:min(100%, calc((100vh - 230px) * 0.7727));min-width:min(100%,320px);height:auto;
+  background:var(--paper);box-shadow:0 14px 30px -16px rgba(0,0,0,.6);display:block}
+@supports (height:100dvh){#doc canvas{width:min(100%, calc((100dvh - 230px) * 0.7727))}}
+.swipe-hint{color:var(--muted);font-size:.88rem;margin:4px 0 0;text-align:center}
+@media (min-width:1001px){.swipe-hint{display:none}}
+.loading{color:var(--muted);font-style:italic;padding:40px 0;text-align:center}
+#sign{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px)}
+@media (max-width:1000px){#sign{position:static}}
+.panel{background:var(--panel);color:var(--panel-text);padding:26px 24px;position:relative;
+  border-top:6px solid var(--seal)}
+.panel h2{font:700 1.75rem/1.15 "EB Garamond",Georgia,serif;margin:0 0 6px}
+.panel>p{color:var(--panel-muted);margin:0 0 22px}
+.grid{display:grid;grid-template-columns:1fr 110px;gap:16px 14px}
+@media (max-width:400px){.grid{grid-template-columns:1fr}}
+label{display:block;font-weight:600;font-size:.92rem;margin-bottom:6px}
+.hint{font-weight:400;color:var(--panel-muted)}
+input,select{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--line);background:var(--paper);color:#1C2430;border-radius:3px}
+input:focus-visible,select:focus-visible,button:focus-visible,canvas:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.padwrap{margin-top:22px}
+#pad{width:100%;height:150px;background:#fff;border:1px solid var(--line);border-radius:3px;touch-action:none;cursor:crosshair;display:block;
+  background-image:linear-gradient(transparent 112px,#9aa3af 112px,#9aa3af 113px,transparent 113px)}
+.padbar{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:.88rem;color:var(--panel-muted)}
+.link{background:none;border:0;color:var(--ink);font:inherit;font-weight:600;cursor:pointer;padding:4px 0;text-decoration:underline}
+.agree{display:flex;gap:10px;align-items:flex-start;margin:24px 0 0;font-size:.95rem}
+.agree input{width:18px;height:18px;margin-top:3px;flex:none}
+.agree label{font-weight:400;margin:0}
+.go{margin-top:26px;width:100%;padding:16px;font:600 1.05rem "IBM Plex Sans",sans-serif;color:#fff;background:var(--seal);border:0;border-radius:3px;cursor:pointer}
+.go:hover{background:var(--seal-hi)}
+.go:disabled{opacity:.55;cursor:not-allowed}
+#msg{margin-top:14px;min-height:1.4em;font-size:.95rem}
+#msg.err{color:var(--seal-hi)}
+.roster{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);color:var(--panel-muted);font-size:.92rem}
+.roster strong{color:var(--panel-text)}
+.roster h3{font:700 1.2rem/1.2 "EB Garamond",Georgia,serif;margin:0 0 10px}
+.roster ol{margin:0 0 14px;padding-left:1.6em;font-size:.93rem;max-height:220px;overflow-y:auto}
+.roster li{padding:2px 0}
+.roster li span{color:var(--panel-muted)}
+.ghost{width:100%;padding:12px;font:600 .95rem "IBM Plex Sans",sans-serif;color:var(--panel-text);background:transparent;border:1px solid var(--line);border-radius:3px;cursor:pointer}
+.ghost:hover:not(:disabled){border-color:var(--panel-text)}
+.ghost:disabled{opacity:.5;cursor:default}
+#msg.ok{color:#1F7A3A}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Samuel Wang Xie has quit Realm of the Mad God.</h1>
+  <p>Swipe or use the arrows to read all four pages, then sign as a witness and download your own signed copy.</p>
+</header>
+
+<main>
+
+  <section id="viewer" aria-label="The covenant">
+    <div class="pager">
+      <button id="prev" type="button" aria-label="Previous page" disabled>‹ Back</button>
+      <div id="count" aria-live="polite">Page 1 of 4</div>
+      <button id="next" type="button" aria-label="Next page">Next ›</button>
+    </div>
+    <div id="doc" tabindex="0" aria-label="Covenant pages, scroll sideways"><div class="loading" id="loading">Loading the covenant…</div></div>
+    <p class="swipe-hint">Swipe left to read each page. The signing form is below the pages.</p>
+  </section>
+
+  <section id="sign" aria-labelledby="sign-h">
+    <div class="panel">
+      <h2 id="sign-h">Sign as a witness</h2>
+      <p>Your name, signature and today’s date go into the witness attestation on page 3, and you download your own signed copy.</p>
+
+      <div>
+        <label for="name">Your full name</label>
+        <input id="name" autocomplete="name" maxlength="40" placeholder="e.g. Jordan Lee">
+      </div>
+
+      <div class="padwrap">
+        <label for="pad">Signature <span class="hint">— draw with your finger or mouse</span></label>
+        <canvas id="pad" tabindex="0" aria-label="Signature pad"></canvas>
+        <div class="padbar"><span id="padstate">Nothing drawn yet</span><button class="link" id="clear" type="button">Clear signature</button></div>
+      </div>
+
+      <div class="agree">
+        <input type="checkbox" id="ok">
+        <label for="ok">I witness this covenant and will hold Sam to it. If I catch him playing RotMG, I’ll bring the receipts to the chat.</label>
+      </div>
+
+      <button class="go" id="go" type="button">Sign and download my copy</button>
+      <div id="msg" role="status" aria-live="polite"></div>
+
+      <div class="roster"><strong>After you download:</strong> post your signed copy in the IMSS group chat so everyone can see you witnessed it.</div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script>
+const PDF_URL = "covenant.pdf";
+// Witness attestation lines on page 3 (PDF points, origin bottom-left)
+const W = { page: 2, sig: { x: 80, y: 318.5, w: 250, h: 30 }, date: { x: 342, y: 321 }, name: { x: 78, y: 283, maxW: 255 } };
+const $ = id => document.getElementById(id);
+const msg = $("msg");
+function say(t, kind) { msg.textContent = t; msg.className = kind || ""; }
+let baseBytes = null;
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+(async () => {
+  const docEl = $("doc");
+  try {
+    baseBytes = new Uint8Array(await fetch(PDF_URL).then(r => { if (!r.ok) throw 0; return r.arrayBuffer(); }));
+    const pdf = await pdfjsLib.getDocument({ data: baseBytes.slice(0) }).promise;
+    $("loading").remove();
+    const scale = Math.min(2.5, (window.devicePixelRatio || 1) * 1.6);
+    for (let n = 1; n <= pdf.numPages; n++) {
+      const page = await pdf.getPage(n);
+      const vp = page.getViewport({ scale });
+      const c = document.createElement("canvas");
+      c.width = vp.width; c.height = vp.height;
+      c.setAttribute("role", "img"); c.setAttribute("aria-label", "Covenant page " + n);
+      docEl.appendChild(c);
+      await page.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise;
+    }
+    setupPager();
+  } catch (e) {
+    $("loading").textContent = "The covenant couldn’t load. If you opened this file directly from your computer, view it on the GitHub Pages link instead.";
+  }
+})();
+
+function setupPager() {
+  const docEl = $("doc");
+  const pages = [...docEl.querySelectorAll("canvas")];
+  const prev = $("prev"), next = $("next"), count = $("count");
+  const smooth = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+  let cur = 0;
+  const update = () => {
+    const left = docEl.scrollLeft, right = left + docEl.clientWidth, base = docEl.offsetLeft;
+    const vis = [];
+    pages.forEach((p, i) => { const l = p.offsetLeft - base, r = l + p.offsetWidth;
+      if (Math.min(r, right) - Math.max(l, left) > p.offsetWidth * 0.6) vis.push(i); });
+    if (!vis.length) vis.push(0);
+    cur = vis[0];
+    const a = vis[0] + 1, z = vis[vis.length - 1] + 1;
+    count.textContent = (a === z ? "Page " + a : "Pages " + a + "–" + z) + " of " + pages.length;
+    prev.disabled = left <= 8; next.disabled = right >= docEl.scrollWidth - 8;
+  };
+  const go = i => { i = Math.max(0, Math.min(pages.length - 1, i));
+    docEl.scrollTo({ left: pages[i].offsetLeft - docEl.offsetLeft, behavior: smooth }); };
+  prev.onclick = () => go(cur - 1);
+  next.onclick = () => go(cur + 1);
+  docEl.addEventListener("scrollend", update);
+  docEl.addEventListener("keydown", e => {
+    if (e.key === "ArrowRight") { e.preventDefault(); go(cur + 1); }
+    if (e.key === "ArrowLeft") { e.preventDefault(); go(cur - 1); }
+  });
+  let t; docEl.addEventListener("scroll", () => { cancelAnimationFrame(t); t = requestAnimationFrame(update); }, { passive: true });
+  window.addEventListener("resize", update);
+  update();
+}
+
+const pad = $("pad");
+const ctx = pad.getContext("2d");
+let drawing = false, hasInk = false, last = null;
+function sizePad() {
+  const r = pad.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+  const old = hasInk ? pad.toDataURL() : null;
+  pad.width = r.width * d; pad.height = r.height * d;
+  ctx.setTransform(d, 0, 0, d, 0, 0);
+  ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#1a2a6c"; ctx.lineWidth = 2.4;
+  if (old) { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0, r.width, r.height); img.src = old; }
+}
+sizePad(); window.addEventListener("resize", sizePad);
+const pos = e => { const r = pad.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+pad.addEventListener("pointerdown", e => { drawing = true; last = pos(e); pad.setPointerCapture(e.pointerId); });
+pad.addEventListener("pointermove", e => {
+  if (!drawing) return;
+  const p = pos(e);
+  ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+  last = p;
+  if (!hasInk) { hasInk = true; $("padstate").textContent = "Signature captured"; }
+});
+["pointerup", "pointercancel", "pointerleave"].forEach(t => pad.addEventListener(t, () => drawing = false));
+$("clear").onclick = () => {
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, pad.width, pad.height); ctx.restore();
+  hasInk = false; $("padstate").textContent = "Nothing drawn yet";
+};
+
+function signaturePng() {
+  const w = pad.width, h = pad.height, data = ctx.getImageData(0, 0, w, h).data;
+  let x0 = w, y0 = h, x1 = 0, y1 = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++)
+    if (data[(y * w + x) * 4 + 3] > 0) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  const m = 6, sw = x1 - x0 + m * 2, sh = y1 - y0 + m * 2;
+  const c = document.createElement("canvas"); c.width = sw; c.height = sh;
+  c.getContext("2d").drawImage(pad, x0 - m, y0 - m, sw, sh, 0, 0, sw, sh);
+  return c.toDataURL("image/png");
+}
+
+$("go").onclick = async () => {
+  const name = $("name").value.trim().replace(/\s+/g, " ");
+  if (!name) return say("Enter your full name before signing.", "err");
+  if (!hasInk) return say("Draw your signature in the box before signing.", "err");
+  if (!$("ok").checked) return say("Tick the witness box to confirm you’re signing.", "err");
+  if (!baseBytes) return say("The covenant hasn’t loaded yet. Wait a moment and try again.", "err");
+
+  const btn = $("go"); btn.disabled = true; say("Signing your copy…");
+  try {
+    const { PDFDocument, StandardFonts, rgb } = PDFLib;
+    const doc = await PDFDocument.load(baseBytes);
+    const page = doc.getPages()[W.page];
+    const font = await doc.embedFont(StandardFonts.TimesRomanBold);
+
+    const png = await doc.embedPng(signaturePng());
+    const k = Math.min(W.sig.w / png.width, W.sig.h / png.height);
+    page.drawImage(png, { x: W.sig.x, y: W.sig.y, width: png.width * k, height: png.height * k });
+
+    const d = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+    page.drawText(d, { x: W.date.x, y: W.date.y, size: 11, font, color: rgb(0, 0, 0) });
+
+    let size = 11; while (font.widthOfTextAtSize(name, size) > W.name.maxW && size > 7) size -= 0.5;
+    page.drawText(name, { x: W.name.x, y: W.name.y, size, font, color: rgb(0, 0, 0) });
+
+    const out = await doc.save();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([out], { type: "application/pdf" }));
+    a.download = "RotMG_Covenant_witnessed_by_" + name.replace(/[^a-z0-9]+/gi, "_") + ".pdf";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    say("Signed. Your copy is downloading. Post it in the IMSS chat.", "ok");
+  } catch (e) {
+    say("Signing failed. Refresh the page and try again.", "err");
+  } finally { btn.disabled = false; }
+};
+</script>
+</body>
+</html>
